@@ -143,6 +143,31 @@ function startDrag(e,id){
   document.addEventListener('mousemove',move); document.addEventListener('mouseup',up);
 }
 
+// ─── ICON DRAG ───
+var _iconDragging=false, _iconDragMoved=false;
+function iconDragStart(e,app){
+  e.stopPropagation();
+  var el=document.getElementById('icon-'+app);
+  var sx=e.clientX-el.offsetLeft, sy=e.clientY-el.offsetTop;
+  _iconDragging=true; _iconDragMoved=false;
+  function move(ev){
+    _iconDragMoved=true;
+    el.style.left=(ev.clientX-sx)+'px';
+    el.style.top=(ev.clientY-sy)+'px';
+  }
+  function up(){
+    _iconDragging=false;
+    document.removeEventListener('mousemove',move);
+    document.removeEventListener('mouseup',up);
+  }
+  document.addEventListener('mousemove',move);
+  document.addEventListener('mouseup',up);
+}
+function iconClick(e,app){
+  if(_iconDragMoved){ _iconDragMoved=false; return; }
+  openApp(app);
+}
+
 // ─── MY PC ───
 function switchPcTab(tab){
   document.getElementById('pcTabInfo').style.display = tab==='info' ? '' : 'none';
@@ -278,6 +303,9 @@ function printDoc(){
 
 // ─── SPREADSHEET ───
 var ROWS=20,COLS=10,cellData={},selCells=new Set(),lastSel=null;
+var fbarEditing=false;
+var cellEditMode=false; // true cuando una celda está en modo edición (2do click)
+
 function buildSheet(){
   var cols='ABCDEFGHIJ'.split('');
   var h='<thead><tr><th class="rh">#</th>';
@@ -287,14 +315,85 @@ function buildSheet(){
     h+='<tr><th class="rh">'+r+'</th>';
     for(var c=0;c<COLS;c++){
       var id=cols[c]+r;
-      h+='<td id="td-'+id+'" onclick="selCell(event,\''+id+'\')"><input id="c-'+id+'" onchange="cChanged(\''+id+'\')" onfocus="selCell(event,\''+id+'\')" style="font-size:11px"></td>';
+      // td maneja click/dblclick; el input está deshabilitado hasta 2do click
+      h+='<td id="td-'+id+'" onclick="selCell(event,\''+id+'\')" ondblclick="editCell(\''+id+'\')">'+
+         '<input id="c-'+id+'" onchange="cChanged(\''+id+'\')" onblur="cellBlur(\''+id+'\')" onkeydown="cellKey(event,\''+id+'\')" style="font-size:11px;pointer-events:none" tabindex="-1" readonly></td>';
     }
     h+='</tr>';
   }
   h+='</tbody>';
   document.getElementById('shTbl').innerHTML=h;
+
+  var fbar=document.getElementById('fbar');
+  fbar.addEventListener('focus',function(){ fbarEditing=true; });
+  fbar.addEventListener('blur',function(){ setTimeout(function(){ fbarEditing=false; },150); });
+  fbar.addEventListener('keydown',function(e){ if(e.key==='Enter'){ applyFml(); fbar.blur(); } if(e.key==='Escape'){ fbarEditing=false; fbar.blur(); } });
 }
+
+function editCell(id){
+  // 2do click (o dblclick): activar edición real
+  var inp=document.getElementById('c-'+id);
+  if(!inp) return;
+  inp.removeAttribute('readonly');
+  inp.style.pointerEvents='auto';
+  inp.tabIndex=0;
+  // Mostrar valor raw (fórmula) al editar
+  inp.value=cellData[id]||inp.value||'';
+  inp.focus();
+  cellEditMode=true;
+}
+
+function cellBlur(id){
+  // Al perder foco, volver a modo solo-lectura visual
+  var inp=document.getElementById('c-'+id);
+  if(!inp) return;
+  inp.setAttribute('readonly','');
+  inp.style.pointerEvents='none';
+  inp.tabIndex=-1;
+  cellEditMode=false;
+  cChanged(id);
+}
+
+function cellKey(e,id){
+  if(e.key==='Enter'||e.key==='Tab'){
+    e.preventDefault();
+    document.getElementById('c-'+id).blur();
+  }
+  if(e.key==='Escape'){
+    var inp=document.getElementById('c-'+id);
+    inp.value=cellData[id]||'';
+    inp.blur();
+  }
+}
+
+function cellFocus(e,id){
+  if(fbarEditing){
+    e.preventDefault();
+    var fbar=document.getElementById('fbar');
+    var val=fbar.value;
+    var pos=fbar.selectionStart;
+    var before=val.slice(0,pos), after=val.slice(pos);
+    before=before.replace(/[A-Z]\d+$/,'');
+    fbar.value=before+id+after;
+    document.querySelectorAll('.sht td').forEach(function(td){ td.style.outline=''; });
+    var td=document.getElementById('td-'+id); if(td) td.style.outline='2px solid #f97316';
+    setTimeout(function(){ fbar.focus(); var l=fbar.value.length; fbar.setSelectionRange(l,l); },10);
+    return;
+  }
+}
+
 function selCell(e,id){
+  if(fbarEditing){
+    var fbar=document.getElementById('fbar');
+    var val=fbar.value;
+    val=val.replace(/[A-Z]\d*$/,'');
+    fbar.value=val+id;
+    document.querySelectorAll('.sht td').forEach(function(td){ td.style.outline=''; });
+    var td=document.getElementById('td-'+id); if(td) td.style.outline='2px solid #f97316';
+    setTimeout(function(){ fbar.focus(); var l=fbar.value.length; fbar.setSelectionRange(l,l); },10);
+    return;
+  }
+  // 1er click: solo seleccionar (resaltar) sin editar
   if(!e.shiftKey) selCells.clear();
   selCells.add(id); lastSel=id;
   document.querySelectorAll('.sht td').forEach(function(td){ td.style.outline=''; });
@@ -339,13 +438,15 @@ function shTxt(c){ selCells.forEach(function(id){ var i=document.getElementById(
 
 // ─── NETWORK ───
 function buildNet(){
+  var online=navigator.onLine;
+  var badge=online?'<span class="nbadge">● Conectado</span>':'<span class="nbadge" style="background:#fee2e2;color:#dc2626">○ Sin conexión</span>';
   document.getElementById('netBody').innerHTML=
     '<div class="ncs">'+
     '<div class="ncc"><h3>Estado de conexión</h3>'+
-    '<span class="nbadge">● Conectado</span>'+
+    badge+
     '<div class="ntp">'+
-    '<button class="ntpill on" id="pw" onclick="swNet(\'wifi\')">📶 WiFi</button>'+
-    '<button class="ntpill" id="pe" onclick="swNet(\'eth\')">🔌 Ethernet</button>'+
+    '<button class="ntpill on" id="pw" onclick="swNet(\'wifi\')">📶 WiFi / Celular</button>'+
+    '<button class="ntpill" id="pe" onclick="swNet(\'eth\')">📡 Info técnica</button>'+
     '</div><div class="ni" id="niBox">'+netHTML('wifi')+'</div></div></div>'+
     '<div class="nd">'+
     '<div class="ndd"><h4>🏠 PAN — Red de Área Personal</h4><p>Alcance 1-10 m, para dispositivos personales. Ej: Bluetooth entre celular y auriculares.</p></div>'+
@@ -355,14 +456,42 @@ function buildNet(){
     '</div>';
 }
 function netHTML(t){
-  if(t==='wifi') return row('Tipo','WiFi 802.11ac')+row('SSID','RedHogar_5G')+row('IP','192.168.1.105')+row('Gateway','192.168.1.1')+row('DNS','8.8.8.8 / 8.8.4.4')+row('Velocidad','↓ 150 Mbps  ↑ 50 Mbps')+row('Señal','████████░░ 78%')+row('MAC','A4:C3:F0:22:1B:7D');
-  return row('Tipo','Ethernet Gigabit')+row('Cable','Cat6 UTP')+row('IP','192.168.0.50')+row('Gateway','192.168.0.1')+row('DNS','1.1.1.1 / 1.0.0.1')+row('Velocidad','↓ 1000 Mbps  ↑ 1000 Mbps')+row('Dúplex','Full Duplex')+row('MAC','B8:27:EB:5F:2A:91');
+  var cn=navigator.connection||navigator.mozConnection||navigator.webkitConnection;
+  if(t==='wifi'){
+    var type=cn?cn.effectiveType:'desconocido';
+    var downlink=cn?cn.downlink:'N/D';
+    var rtt=cn?cn.rtt:'N/D';
+    var saveData=cn?(cn.saveData?'Activado':'Desactivado'):'N/D';
+    var online=navigator.onLine?'Sí':'No';
+    var lang=navigator.language||'es-AR';
+    var platform=navigator.platform||'N/D';
+    var cores=navigator.hardwareConcurrency||'N/D';
+    return row('Estado',navigator.onLine?'✅ En línea':'❌ Sin conexión')+
+           row('Tipo de red',cn?(cn.type||type):type)+
+           row('Velocidad estimada',downlink!=='N/D'?downlink+' Mbps':'N/D')+
+           row('Latencia estimada',rtt!=='N/D'?rtt+' ms':'N/D')+
+           row('Ahorro de datos',saveData)+
+           row('Idioma del dispositivo',lang)+
+           row('Plataforma',platform)+
+           row('Núcleos CPU',cores);
+  }
+  // Info técnica del navegador
+  var ua=navigator.userAgent;
+  var browser=/Edg/i.test(ua)?'Microsoft Edge':(/Chrome/i.test(ua)?'Google Chrome':(/Firefox/i.test(ua)?'Firefox':'Safari'));
+  var proto=location.protocol==='https:'?'HTTPS (seguro)':'HTTP';
+  return row('Navegador',browser)+
+         row('Protocolo',proto)+
+         row('Host',location.hostname||'local')+
+         row('Cookies',navigator.cookieEnabled?'Habilitadas':'Deshabilitadas')+
+         row('User Agent',ua.substring(0,40)+'...')+
+         row('Pantalla',screen.width+'×'+screen.height+' px')+
+         row('Zona horaria',Intl.DateTimeFormat().resolvedOptions().timeZone);
 }
 function row(k,v){ return '<div><span>'+k+'</span><strong>'+v+'</strong></div>'; }
 function swNet(t){
   document.getElementById('pw').className='ntpill'+(t==='wifi'?' on':'');
   document.getElementById('pe').className='ntpill'+(t==='eth'?' on':'');
-  document.getElementById('niBox').innerHTML=netHTML(t);
+  document.getElementById('niBox').innerHTML=netHTML(t==='wifi'?'wifi':'eth');
 }
 
 // ─── PRINTERS ───
@@ -641,6 +770,9 @@ openApp=function(app){
 // ─── AI ASSISTANT ───
 // ═══════════════════════════════════════
 var aiHistory=[];
+// Para usar la IA real, reemplazá esta variable con tu API key de Anthropic
+// Obtené una en: https://console.anthropic.com/
+var AI_API_KEY = '';  // <-- pegá tu API key acá: 'sk-ant-...'
 
 function aiInputKey(e){
   if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); aiSend(); }
@@ -658,15 +790,12 @@ async function aiSend(){
   var text=input.value.trim(); if(!text) return;
   input.value='';
 
-  // Agregar mensaje del usuario
   aiAddMsg('user', text);
   aiHistory.push({role:'user',content:text});
 
-  // Deshabilitar botón
   var btn=document.getElementById('aiSendBtn');
   btn.disabled=true; btn.style.opacity='0.5';
 
-  // Indicador de escritura
   var typingId='aiTyping_'+Date.now();
   var msgs=document.getElementById('aiMessages');
   msgs.innerHTML+='<div class="aiMsg bot aiTyping" id="'+typingId+'">'+
@@ -676,10 +805,33 @@ async function aiSend(){
     '</div></div></div>';
   msgs.scrollTop=msgs.scrollHeight;
 
+  if(!AI_API_KEY){
+    setTimeout(function(){
+      var typingEl=document.getElementById(typingId);
+      if(typingEl) typingEl.remove();
+      aiAddMsg('bot',
+        '⚠️ Para usar el Asistente IA necesitás configurar tu API key de Anthropic.\n\n'+
+        '📋 Pasos:\n'+
+        '1. Creá una cuenta en console.anthropic.com\n'+
+        '2. Generá una API key\n'+
+        '3. Abrí el archivo app.js y buscá la línea:\n   var AI_API_KEY = \'\'\n'+
+        '4. Pegá tu key ahí entre las comillas\n\n'+
+        '⚡ Nota: la llamada a la API requiere un servidor backend o extensión del navegador que permita CORS para dominio anthropic.com.');
+      btn.disabled=false; btn.style.opacity='1';
+      msgs.scrollTop=msgs.scrollHeight;
+    }, 600);
+    return;
+  }
+
   try{
     var response=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
-      headers:{'Content-Type':'application/json'},
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key': AI_API_KEY,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
       body:JSON.stringify({
         model:'claude-sonnet-4-20250514',
         max_tokens:1000,
@@ -688,8 +840,8 @@ async function aiSend(){
       })
     });
     var data=await response.json();
+    if(data.error){ throw new Error(data.error.message||'Error de API'); }
     var reply=(data.content&&data.content[0]&&data.content[0].text)||'No pude generar una respuesta. Intentá de nuevo.';
-    // Quitar typing
     var typingEl=document.getElementById(typingId);
     if(typingEl) typingEl.remove();
     aiAddMsg('bot', reply);
@@ -697,7 +849,12 @@ async function aiSend(){
   } catch(err){
     var typingEl=document.getElementById(typingId);
     if(typingEl) typingEl.remove();
-    aiAddMsg('bot','❌ Error al conectar con la IA. Verificá tu conexión e intentá de nuevo.\n\nDetalle: '+err.message);
+    var msg=err.message||'';
+    if(msg.toLowerCase().indexOf('fetch')!==-1||msg.toLowerCase().indexOf('cors')!==-1||msg.toLowerCase().indexOf('network')!==-1){
+      aiAddMsg('bot','❌ Error de conexión (CORS): los navegadores bloquean llamadas directas a la API de Anthropic por seguridad.\n\nPara resolverlo necesitás:\n• Servir el proyecto desde un servidor backend (Node.js, Python, etc.)\n• O usar una extensión que permita CORS\n\nDetalle: '+msg);
+    } else {
+      aiAddMsg('bot','❌ Error: '+msg);
+    }
   }
 
   btn.disabled=false; btn.style.opacity='1';
