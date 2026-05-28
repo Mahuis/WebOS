@@ -1,0 +1,199 @@
+/* ─── RESET & BASE ─── */
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif}
+html,body{width:100%;height:100%;overflow:hidden;background:#1a1a2e}
+.screen{position:fixed;inset:0;transition:opacity 0.4s}
+.screen.hidden{opacity:0;pointer-events:none}
+
+/* ─── DARK THEME (default) ─── */
+body.theme-dark{
+  --bg-desktop-a:#1a1a2e;--bg-desktop-b:#16213e;--bg-desktop-c:#0f3460;
+  --win-bg:#fff;--wbody-bg:#f5f6f7;
+  --taskbar-bg:rgba(0,0,0,0.65);--taskbar-border:rgba(255,255,255,0.08);
+  --tbapp-bg:rgba(255,255,255,0.08);--tbapp-border:rgba(255,255,255,0.14);
+  --tbapp-color:#fff;
+  --icon-label:rgba(255,255,255,0.9);
+  --icon-hover:rgba(255,255,255,0.12);
+  --theme-btn-label:🌙;
+}
+
+/* ─── LIGHT THEME ─── */
+body.theme-light{
+  --bg-desktop-a:#dce8f5;--bg-desktop-b:#c8ddf0;--bg-desktop-c:#b0cde8;
+  --win-bg:#fff;--wbody-bg:#f5f6f7;
+  --taskbar-bg:rgba(220,232,245,0.95);--taskbar-border:rgba(0,0,0,0.12);
+  --tbapp-bg:rgba(255,255,255,0.7);--tbapp-border:rgba(0,0,0,0.15);
+  --tbapp-color:#222;
+  --icon-label:#1a1a2e;
+  --icon-hover:rgba(0,0,0,0.1);
+  --theme-btn-label:☀️;
+}
+
+/* ─── AUTH SCREEN ─── */
+#loginScreen{background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);display:flex;align-items:center;justify-content:center;z-index:9999}
+.authBox{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.13);border-radius:22px;padding:40px 38px;width:360px;text-align:center}
+.authBox h1{color:#fff;font-size:24px;font-weight:300;margin-bottom:5px;letter-spacing:2px}
+.authBox .sub{color:rgba(255,255,255,0.4);font-size:12px;margin-bottom:26px}
+.authBox input{width:100%;padding:11px 14px;border:1px solid rgba(255,255,255,0.18);border-radius:9px;background:rgba(255,255,255,0.09);color:#fff;font-size:13px;margin-bottom:11px;outline:none;display:block}
+.authBox input::placeholder{color:rgba(255,255,255,0.32)}
+.authBox input:focus{border-color:rgba(102,126,234,0.7);background:rgba(255,255,255,0.13)}
+.authLabel{color:rgba(255,255,255,0.55);font-size:11px;text-align:left;margin-bottom:5px;display:block}
+.btnPrimary{width:100%;padding:12px;background:linear-gradient(135deg,#667eea,#764ba2);border:none;border-radius:9px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;margin-top:4px;letter-spacing:0.4px;transition:opacity 0.2s}
+.btnPrimary:hover{opacity:0.86}
+.btnSecondary{width:100%;padding:10px;background:transparent;border:1px solid rgba(255,255,255,0.2);border-radius:9px;color:rgba(255,255,255,0.7);font-size:13px;cursor:pointer;margin-top:10px;transition:all 0.2s}
+.btnSecondary:hover{background:rgba(255,255,255,0.07);color:#fff}
+.authError{color:#f87171;font-size:12px;margin-top:8px;min-height:16px}
+.authSuccess{color:#4ade80;font-size:12px;margin-top:8px;min-height:16px}
+.authDivider{display:flex;align-items:center;gap:10px;margin:18px 0}
+.authDivider::before,.authDivider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.12)}
+.authDivider span{color:rgba(255,255,255,0.3);font-size:11px}
+.avatarPicker{display:flex;gap:10px;justify-content:center;margin-bottom:14px;flex-wrap:wrap}
+.avatarOpt{font-size:26px;cursor:pointer;padding:6px;border-radius:10px;border:2px solid transparent;transition:all 0.2s;user-select:none}
+.avatarOpt:hover{background:rgba(255,255,255,0.1)}
+.avatarOpt.picked{border-color:#667eea;background:rgba(102,126,234,0.2)}
+.usersList{margin-bottom:16px;max-height:160px;overflow-y:auto}
+.userCard{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid rgba(255,255,255,0.12);border-radius:11px;margin-bottom:8px;cursor:pointer;transition:background 0.2s}
+.userCard:hover{background:rgba(255,255,255,0.08)}
+.userCard.sel{background:rgba(102,126,234,0.25);border-color:rgba(102,126,234,0.5)}
+.userAvatar{font-size:28px;width:40px;height:40px;display:flex;align-items:center;justify-content:center}
+.userName{color:#fff;font-size:13px;font-weight:500;text-align:left}
+.userSub{color:rgba(255,255,255,0.4);font-size:11px;text-align:left}
+.tabBtns{display:flex;margin-bottom:22px;border:1px solid rgba(255,255,255,0.15);border-radius:10px;overflow:hidden}
+.tabBtn{flex:1;padding:9px;background:transparent;border:none;color:rgba(255,255,255,0.5);font-size:13px;cursor:pointer;transition:all 0.2s}
+.tabBtn.on{background:rgba(102,126,234,0.4);color:#fff;font-weight:600}
+
+/* ─── DESKTOP ─── */
+#desktop{background:linear-gradient(135deg,var(--bg-desktop-a) 0%,var(--bg-desktop-b) 50%,var(--bg-desktop-c) 100%);display:flex;flex-direction:column;z-index:100;transition:background 0.4s}
+#desktopArea{flex:1;position:relative;overflow:hidden;padding:20px}
+.desktopGrid{display:flex;flex-wrap:wrap;gap:18px}
+.desktopIcon{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;padding:10px 8px;border-radius:12px;width:76px;transition:background 0.2s;user-select:none}
+.desktopIcon:hover{background:var(--icon-hover)}
+.iconImg{width:50px;height:50px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px}
+.desktopIcon span{color:var(--icon-label);font-size:10px;text-align:center;text-shadow:0 1px 3px rgba(0,0,0,0.4);line-height:1.3}
+
+/* ─── TASKBAR ─── */
+#taskbar{height:42px;background:var(--taskbar-bg);border-top:1px solid var(--taskbar-border);display:flex;align-items:center;padding:0 12px;gap:8px;flex-shrink:0;z-index:500;transition:background 0.3s}
+#startBtn{background:rgba(102,126,234,0.85);border:none;border-radius:7px;color:#fff;padding:5px 12px;cursor:pointer;font-size:12px;font-weight:600;white-space:nowrap}
+#themeBtn{background:transparent;border:1px solid rgba(128,128,128,0.3);border-radius:7px;padding:4px 8px;cursor:pointer;font-size:14px;line-height:1;transition:background 0.2s}
+#themeBtn:hover{background:rgba(128,128,128,0.2)}
+.tbDiv{width:1px;height:22px;background:rgba(128,128,128,0.25);flex-shrink:0}
+#taskbarApps{flex:1;display:flex;gap:5px;overflow:hidden}
+.tbApp{background:var(--tbapp-bg);border:1px solid var(--tbapp-border);border-radius:5px;color:var(--tbapp-color);font-size:11px;padding:3px 9px;cursor:pointer;white-space:nowrap}
+.tbApp.active{background:rgba(102,126,234,0.45);border-color:rgba(102,126,234,0.6);color:#fff}
+#tbClock{color:var(--tbapp-color);font-size:11px;text-align:right;line-height:1.5;white-space:nowrap}
+
+/* ─── WINDOWS ─── */
+.win{position:absolute;background:var(--win-bg);border-radius:11px;box-shadow:0 16px 50px rgba(0,0,0,0.55);display:flex;flex-direction:column;min-width:300px;min-height:200px}
+.win.hidden{display:none!important}
+.tbar{background:linear-gradient(135deg,#667eea,#764ba2);padding:0 10px;height:36px;display:flex;align-items:center;gap:7px;cursor:move;user-select:none;flex-shrink:0;border-radius:11px 11px 0 0}
+.tbar span{color:#fff;font-size:12px;font-weight:500;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wb{width:12px;height:12px;border-radius:50%;border:none;cursor:pointer;flex-shrink:0}
+.wc{background:#ff5f57}.wm{background:#febc2e}.wx{background:#28c840}
+.wbody{flex:1;overflow:auto;background:var(--wbody-bg)}
+
+/* ─── SHARED BUTTONS ─── */
+.appBtn{padding:6px 14px;border:1px solid #ccc;border-radius:6px;background:#fff;cursor:pointer;font-size:12px;color:#333;transition:all 0.15s}
+.appBtn:hover{background:#f0f0f0}
+.appBtn.pri{background:#667eea;color:#fff;border-color:#667eea}
+.appBtn.pri:hover{background:#5a6fd6}
+.appBtn.dng{background:#fee2e2;color:#dc2626;border-color:#fca5a5}
+
+/* ─── SPREADSHEET ─── */
+#stToolbar{padding:7px;background:#fff;border-bottom:1px solid #e0e0e0;display:flex;gap:5px;align-items:center;flex-wrap:wrap;flex-shrink:0}
+#sheetWrap{flex:1;overflow:auto}
+.sht{border-collapse:collapse;min-width:100%}
+.sht th{background:#f1f3f4;border:1px solid #ccd;padding:3px 6px;font-size:11px;font-weight:600;color:#555;position:sticky;top:0;z-index:1;min-width:70px}
+.sht td{border:1px solid #dde;padding:0;min-width:70px;height:22px}
+.sht td input{width:100%;height:100%;border:none;outline:none;padding:0 3px;font-size:11px;background:transparent;color:#222}
+.sht td input:focus{background:#e8f0fe}
+.rh{min-width:30px!important;max-width:30px;text-align:center;font-size:10px;color:#777;font-weight:600}
+
+/* ─── MY PC ─── */
+.pcs{padding:16px}
+.pcc{background:#fff;border:1px solid #e0e0e0;border-radius:9px;padding:14px;margin-bottom:10px}
+.pcc h3{font-size:13px;font-weight:600;color:#333;margin-bottom:10px}
+.pcs2{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f0f0f0;font-size:12px}
+.pcs2:last-child{border-bottom:none}
+.pbl{height:5px;background:#e8e8e8;border-radius:3px;margin-top:4px}
+.pbf{height:100%;border-radius:3px;background:linear-gradient(90deg,#667eea,#764ba2)}
+
+/* ─── NETWORK ─── */
+.ncs{padding:14px}
+.ncc{background:#fff;border:1px solid #e0e0e0;border-radius:9px;padding:12px;margin-bottom:10px}
+.ncc h3{font-size:12px;font-weight:600;color:#333;margin-bottom:8px}
+.nbadge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700;margin-bottom:8px;background:#dcfce7;color:#16a34a}
+.ntp{display:flex;gap:7px;margin-bottom:9px}
+.ntpill{padding:4px 12px;border-radius:20px;font-size:11px;cursor:pointer;border:1px solid #ccc;background:#fff}
+.ntpill.on{background:#667eea;color:#fff;border-color:#667eea}
+.ni{background:#f8f9fa;border-radius:7px;padding:9px;font-size:11px}
+.ni div{display:flex;justify-content:space-between;padding:2px 0;color:#555}
+.ni strong{color:#222}
+.nd{padding:0 14px 14px}
+.ndd{background:#f8f9fa;border-radius:7px;padding:10px;margin-bottom:7px}
+.ndd h4{font-size:11px;font-weight:700;color:#667eea;margin-bottom:3px}
+.ndd p{font-size:11px;color:#555;line-height:1.5}
+
+/* ─── PRINTERS ─── */
+.prs{padding:14px}
+.prc{background:#fff;border:1px solid #e0e0e0;border-radius:9px;padding:12px;margin-bottom:10px}
+.prc h3{font-size:12px;font-weight:600;color:#333;margin-bottom:9px}
+.pri{display:flex;justify-content:space-between;align-items:center;padding:7px;border:1px solid #eee;border-radius:7px;margin-bottom:5px}
+.prn{font-size:12px;font-weight:500;color:#333}
+.pst{font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px}
+.pon{background:#dcfce7;color:#16a34a}
+.pof{background:#fee2e2;color:#dc2626}
+.qi{display:flex;justify-content:space-between;align-items:center;padding:5px 7px;border-bottom:1px solid #f0f0f0;font-size:11px;color:#555}
+.qs{font-size:10px;font-weight:700;padding:2px 6px;border-radius:8px}
+.qp{background:#fef9c3;color:#854d0e}
+.qw{background:#dbeafe;color:#1d4ed8}
+.apf{background:#f8f9fa;border-radius:7px;padding:10px;margin-top:8px}
+.apf input,.apf select{width:100%;padding:7px 9px;border:1px solid #ccc;border-radius:5px;font-size:12px;margin-bottom:7px;outline:none}
+
+/* ─── MY PC TABS ─── */
+.pcTab{flex:1;padding:8px 10px;background:transparent;border:none;border-bottom:2px solid transparent;font-size:12px;cursor:pointer;color:#666;transition:all 0.2s;font-family:inherit}
+.pcTab:hover{background:#f5f5f5;color:#333}
+.pcTab.on{color:#667eea;border-bottom-color:#667eea;font-weight:600;background:#f0f2ff}
+
+/* ─── ERGONOMÍA ─── */
+.ergo-wrap{padding:16px}
+.ergo-hero{background:linear-gradient(135deg,#667eea,#764ba2);border-radius:12px;padding:16px;margin-bottom:14px;color:#fff;text-align:center}
+.ergo-hero h2{font-size:15px;font-weight:700;margin-bottom:4px}
+.ergo-hero p{font-size:11px;opacity:0.85;line-height:1.5}
+.ergo-card{background:#fff;border:1px solid #e0e0e0;border-radius:10px;padding:13px;margin-bottom:10px}
+.ergo-card-header{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.ergo-card-icon{font-size:20px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:#f0f2ff;border-radius:8px}
+.ergo-card-title{font-size:12px;font-weight:700;color:#333}
+.ergo-card-sub{font-size:10px;color:#888}
+.ergo-tip{display:flex;align-items:flex-start;gap:7px;padding:5px 0;border-bottom:1px solid #f3f3f3;font-size:11px;color:#444;line-height:1.5}
+.ergo-tip:last-child{border-bottom:none}
+.ergo-tip-dot{width:6px;height:6px;border-radius:50%;background:#667eea;flex-shrink:0;margin-top:4px}
+.ergo-badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:700;margin-left:6px}
+.ergo-badge.good{background:#dcfce7;color:#16a34a}
+.ergo-badge.warn{background:#fef9c3;color:#854d0e}
+.ergo-badge.bad{background:#fee2e2;color:#dc2626}
+
+/* ─── PAINT ─── */
+#paintToolbar{padding:6px 8px;background:#f0f0f0;border-bottom:1px solid #ccc;display:flex;align-items:center;gap:6px;flex-shrink:0;flex-wrap:wrap}
+.ptGroup{display:flex;align-items:center;gap:3px}
+.ptSep{width:1px;height:28px;background:#ccc;flex-shrink:0}
+.ptBtn{padding:5px 7px;border:1px solid #bbb;border-radius:5px;background:#fff;cursor:pointer;font-size:13px;line-height:1;transition:all 0.15s;color:#333}
+.ptBtn:hover{background:#e8eaff;border-color:#667eea}
+.ptBtn.active{background:#667eea;color:#fff;border-color:#5060cc}
+#paintColorPalette{display:flex;flex-wrap:wrap;gap:3px;width:168px}
+.pcolor{width:18px;height:18px;border-radius:3px;cursor:pointer;border:2px solid transparent;transition:transform 0.1s;flex-shrink:0}
+.pcolor:hover{transform:scale(1.25);border-color:#333}
+.pcolor.sel{border-color:#333;transform:scale(1.15)}
+
+/* ─── AI CHAT ─── */
+.aiMsg{display:flex;gap:8px;align-items:flex-start}
+.aiMsg.user{flex-direction:row-reverse}
+.aiAvatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;background:#e8eaff}
+.aiMsg.user .aiAvatar{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff}
+.aiBubble{max-width:80%;padding:9px 13px;border-radius:14px;font-size:12px;line-height:1.6;word-break:break-word;white-space:pre-wrap}
+.aiMsg.bot .aiBubble{background:#fff;border:1px solid #e0e0e0;border-radius:4px 14px 14px 14px;color:#222}
+.aiMsg.user .aiBubble{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border-radius:14px 4px 14px 14px}
+.aiTyping .aiBubble{background:#fff;border:1px solid #e0e0e0}
+.aiDots{display:flex;gap:4px;align-items:center;padding:2px 0}
+.aiDot{width:6px;height:6px;border-radius:50%;background:#aaa;animation:dotBounce 1.2s infinite}
+.aiDot:nth-child(2){animation-delay:0.2s}
+.aiDot:nth-child(3){animation-delay:0.4s}
+@keyframes dotBounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
