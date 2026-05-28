@@ -54,35 +54,33 @@
 <!-- DESKTOP -->
 <div id="desktop" class="screen hidden">
   <div id="desktopArea">
-    <div class="desktopGrid">
-      <div class="desktopIcon" onclick="openApp('mypc')">
-        <div class="iconImg" style="background:linear-gradient(135deg,#4facfe,#00f2fe)">🖥️</div>
-        <span>Mi PC</span>
-      </div>
-      <div class="desktopIcon" onclick="openApp('notepad')">
-        <div class="iconImg" style="background:linear-gradient(135deg,#f093fb,#f5576c)">📝</div>
-        <span>Procesador de texto</span>
-      </div>
-      <div class="desktopIcon" onclick="openApp('spreadsheet')">
-        <div class="iconImg" style="background:linear-gradient(135deg,#43e97b,#38f9d7)">📊</div>
-        <span>Planilla de cálculo</span>
-      </div>
-      <div class="desktopIcon" onclick="openApp('network')">
-        <div class="iconImg" style="background:linear-gradient(135deg,#667eea,#764ba2)">🌐</div>
-        <span>Redes</span>
-      </div>
-      <div class="desktopIcon" onclick="openApp('printers')">
-        <div class="iconImg" style="background:linear-gradient(135deg,#f7971e,#ffd200)">🖨️</div>
-        <span>Impresoras</span>
-      </div>
-      <div class="desktopIcon" onclick="openApp('paint')">
-        <div class="iconImg" style="background:linear-gradient(135deg,#f953c6,#b91d73)">🎨</div>
-        <span>Paint</span>
-      </div>
-      <div class="desktopIcon" onclick="openApp('ai')">
-        <div class="iconImg" style="background:linear-gradient(135deg,#11998e,#38ef7d)">🤖</div>
-        <span>Asistente IA</span>
-      </div>
+    <div class="desktopIcon" id="icon-mypc" style="position:absolute;left:20px;top:20px" onmousedown="iconDragStart(event,'mypc')" onclick="iconClick(event,'mypc')">
+      <div class="iconImg" style="background:linear-gradient(135deg,#4facfe,#00f2fe)">🖥️</div>
+      <span>Mi PC</span>
+    </div>
+    <div class="desktopIcon" id="icon-notepad" style="position:absolute;left:20px;top:110px" onmousedown="iconDragStart(event,'notepad')" onclick="iconClick(event,'notepad')">
+      <div class="iconImg" style="background:linear-gradient(135deg,#f093fb,#f5576c)">📝</div>
+      <span>Procesador de texto</span>
+    </div>
+    <div class="desktopIcon" id="icon-spreadsheet" style="position:absolute;left:20px;top:200px" onmousedown="iconDragStart(event,'spreadsheet')" onclick="iconClick(event,'spreadsheet')">
+      <div class="iconImg" style="background:linear-gradient(135deg,#43e97b,#38f9d7)">📊</div>
+      <span>Planilla de cálculo</span>
+    </div>
+    <div class="desktopIcon" id="icon-network" style="position:absolute;left:20px;top:290px" onmousedown="iconDragStart(event,'network')" onclick="iconClick(event,'network')">
+      <div class="iconImg" style="background:linear-gradient(135deg,#667eea,#764ba2)">🌐</div>
+      <span>Redes</span>
+    </div>
+    <div class="desktopIcon" id="icon-printers" style="position:absolute;left:20px;top:380px" onmousedown="iconDragStart(event,'printers')" onclick="iconClick(event,'printers')">
+      <div class="iconImg" style="background:linear-gradient(135deg,#f7971e,#ffd200)">🖨️</div>
+      <span>Impresoras</span>
+    </div>
+    <div class="desktopIcon" id="icon-paint" style="position:absolute;left:110px;top:20px" onmousedown="iconDragStart(event,'paint')" onclick="iconClick(event,'paint')">
+      <div class="iconImg" style="background:linear-gradient(135deg,#f953c6,#b91d73)">🎨</div>
+      <span>Paint</span>
+    </div>
+    <div class="desktopIcon" id="icon-ai" style="position:absolute;left:110px;top:110px" onmousedown="iconDragStart(event,'ai')" onclick="iconClick(event,'ai')">
+      <div class="iconImg" style="background:linear-gradient(135deg,#11998e,#38ef7d)">🤖</div>
+      <span>Asistente IA</span>
     </div>
   </div>
   <div id="taskbar">
@@ -148,7 +146,7 @@
       <label style="font-size:11px;color:#666">Texto:</label>
       <input type="color" id="ctx" value="#000000" onchange="shTxt(this.value)" style="width:26px;height:22px;border:none;cursor:pointer;border-radius:3px">
       <div style="flex:1"></div>
-      <input id="fbar" placeholder="=A1+B1 o =SUMA(A1:C3)" style="padding:3px 7px;border:1px solid #ccc;border-radius:5px;font-size:11px;width:200px;outline:none">
+      <input id="fbar" placeholder="Escribí = y clickeá celdas para armar la fórmula" style="padding:3px 7px;border:1px solid #ccc;border-radius:5px;font-size:11px;width:240px;outline:none" title="Escribí = para empezar una fórmula, luego hacé click en las celdas para insertarlas automáticamente">
       <button class="appBtn pri" onclick="applyFml()">= OK</button>
     </div>
     <div id="sheetWrap"><table class="sht" id="shTbl"></table></div>
@@ -238,36 +236,29 @@
 </div>
 
 <!-- AI ASSISTANT -->
-<div class="win hidden" id="win-ai" style="width:480px;height:560px;left:220px;top:30px;z-index:200">
+<div class="win hidden" id="win-ai" style="width:900px;height:620px;left:80px;top:20px;z-index:200">
   <div class="tbar" onmousedown="startDrag(event,'win-ai')">
     <button class="wb wc" onclick="closeWin('ai')"></button>
     <button class="wb wm" onclick="minWin('ai')"></button>
     <button class="wb wx" onclick="maxWin('win-ai')"></button>
-    <span>🤖 Asistente IA — WebOS AI</span>
+    <span>🤖 ChatGPT — Asistente IA</span>
   </div>
-  <div class="wbody" style="display:flex;flex-direction:column;background:#f0f2f5">
-    <!-- Header IA -->
-    <div style="padding:12px 16px;background:linear-gradient(135deg,#11998e,#38ef7d);display:flex;align-items:center;gap:10px;flex-shrink:0">
-      <div style="font-size:28px">🤖</div>
-      <div>
-        <div style="color:#fff;font-size:13px;font-weight:700">WebOS AI</div>
-        <div style="color:rgba(255,255,255,0.8);font-size:10px">Powered by Claude · Siempre listo para ayudarte</div>
-      </div>
-      <button class="ptBtn" onclick="aiClearChat()" style="margin-left:auto;font-size:10px;padding:4px 8px;background:rgba(255,255,255,0.2);border-color:rgba(255,255,255,0.4);color:#fff" title="Limpiar chat">🗑️</button>
+  <div class="wbody" style="overflow:hidden;position:relative;background:#fff;display:flex;flex-direction:column">
+    <!-- Barra de navegación interna -->
+    <div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:#f7f7f7;border-bottom:1px solid #e0e0e0;flex-shrink:0">
+      <div style="width:10px;height:10px;border-radius:50%;background:#10a37f"></div>
+      <span style="font-size:11px;color:#555;font-weight:500">chatgpt.com</span>
+      <div style="flex:1"></div>
+      <button onclick="document.getElementById('aiFrame').src='https://chatgpt.com'" style="font-size:10px;padding:3px 9px;border:1px solid #ccc;border-radius:5px;background:#fff;cursor:pointer;color:#444">↺ Recargar</button>
+      <a href="https://chatgpt.com" target="_blank" rel="noopener" style="font-size:10px;padding:3px 9px;border:1px solid #ccc;border-radius:5px;background:#fff;cursor:pointer;color:#444;text-decoration:none">↗ Abrir en pestaña</a>
     </div>
-    <!-- Mensajes -->
-    <div id="aiMessages" style="flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px">
-      <div class="aiMsg bot">
-        <div class="aiAvatar">🤖</div>
-        <div class="aiBubble">¡Hola! Soy el asistente IA de WebOS. Podés preguntarme sobre cualquier tema: tecnología, ayuda con tareas, programación, matemáticas, escritura... ¿En qué te ayudo hoy?</div>
-      </div>
-    </div>
-    <!-- Input -->
-    <div style="padding:10px;background:#fff;border-top:1px solid #e0e0e0;display:flex;gap:8px;flex-shrink:0;align-items:flex-end">
-      <textarea id="aiInput" placeholder="Escribí tu mensaje..." rows="2"
-        style="flex:1;border:1px solid #ccc;border-radius:10px;padding:8px 12px;font-size:12px;resize:none;outline:none;font-family:inherit;line-height:1.4"
-        onkeydown="aiInputKey(event)"></textarea>
-      <button id="aiSendBtn" onclick="aiSend()" style="background:linear-gradient(135deg,#11998e,#38ef7d);border:none;border-radius:10px;padding:10px 14px;cursor:pointer;font-size:16px;color:#fff;flex-shrink:0">➤</button>
+    <!-- iframe ChatGPT -->
+    <div style="flex:1;position:relative">
+      <iframe id="aiFrame" src="https://chatgpt.com"
+        style="position:absolute;inset:0;width:100%;height:100%;border:none;display:block"
+        allow="clipboard-read; clipboard-write"
+        loading="lazy">
+      </iframe>
     </div>
   </div>
 </div>
